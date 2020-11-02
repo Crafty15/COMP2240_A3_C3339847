@@ -2,33 +2,39 @@
 //Purpose:	Process object class for COMP2240 - operating systems assignment 3
 //Programmer: Liam Craft - c3339847
 //Date: 1/11/2020
-package com.A3;
 
 import java.io.*;
 import java.util.ArrayList;
 
+
 public class Process {
+    //Static variables
+    private static ArrayList<Process> readyQ;
+    private static ArrayList<Process> blockedQ;
+    private static Process current;
+    //Member variables
     ArrayList<Integer> pages;
     String name;
 
     //default
     public Process(){
         this.pages = new ArrayList<Integer>();
-        name = "default1";
+        this.readyQ = new ArrayList<Process>();
+        name = "default";
     }
 
-    //constructor
+    //constructor 1
     public Process(ArrayList<Integer> newPages){
         this.pages = newPages;
-        name = "default2";
+        name = "default1";
     }
-    //constructor
+    //constructor 2
     public Process(ArrayList<Integer> newPages, String newName){
         this.pages = newPages;
         name = newName;
     }
 
-    //getters
+    //****Getters****
     public ArrayList<Integer> getPages(){
         return this.pages;
     }
@@ -42,7 +48,7 @@ public class Process {
         return this.pages.get(i);
     }
 
-    //setters
+    //****Setters****
     public void setPages(ArrayList<Integer> newPages){
         this.pages = newPages;
     }

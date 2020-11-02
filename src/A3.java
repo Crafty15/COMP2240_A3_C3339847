@@ -2,7 +2,6 @@
 //Purpose:	Main class for COMP2240 - operating systems assignment 3
 //Programmer: Liam Craft - c3339847
 //Date: 1/11/2020
-package com.A3;
 
 import java.util.ArrayList;
 
@@ -22,9 +21,11 @@ public class A3 {
                 //check frame number input
                 if (i == 0) {
                     if (Process.isNumeric(args[i]) && Integer.parseInt(args[i]) > 0) {
+                        int numFrames = Integer.parseInt(args[i]);
                         //frame number ok, do whatever...
                         //TEST OUTPUT
-                        System.out.println("Frame numbers are ok.");
+                        System.out.println("Frame number format ok.");
+                        System.out.println("Frame numbers: " + );
                         //
                     } else {
                         System.out.println("Error parsing first argument.");
@@ -66,10 +67,10 @@ public class A3 {
                         processList.add(p);
 
                         //TEST OUTPUT OF PROCESS OBJECTS
-                        int pCount = p.getProcessCount();
-                        for(int f = 0; f < pCount; f++){
-                            System.out.println(p.getName() + ": " + p.getInstruction(f));
-                        }
+//                        int pCount = p.getProcessCount();
+//                        for(int f = 0; f < pCount; f++){
+//                            System.out.println(p.getName() + ": " + p.getInstruction(f));
+//                        }
                         //
                     } else {
                         System.out.println("Error parsing argument " + (i + 1) + ".");
