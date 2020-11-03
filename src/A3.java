@@ -10,6 +10,9 @@ public class A3 {
     public static void main(String[] args) {
         //Process list
         ArrayList<Process> processList = new ArrayList<Process>();
+        //input variables
+        int numFrames = 0;
+        int timeQuantum = 0;
 
         System.out.println("TESTING input....");
         //Check args exists, exit if not
@@ -21,7 +24,7 @@ public class A3 {
                 //check frame number input
                 if (i == 0) {
                     if (Process.isNumeric(args[i]) && Integer.parseInt(args[i]) > 0) {
-                        int numFrames = Integer.parseInt(args[i]);
+                        numFrames = Integer.parseInt(args[i]);
                         //frame number ok, do whatever...
                         //TEST OUTPUT
                         System.out.println("Frame number format ok.");
@@ -37,7 +40,7 @@ public class A3 {
                 else if (i == 1) {
                     if (Process.isNumeric(args[1]) && Integer.parseInt(args[1]) > 0) {
                         //quantum size input is ok, do whatever.....
-                        int timeQuantum = Integer.parseInt(args[1]);
+                        timeQuantum = Integer.parseInt(args[1]);
                         //TEST OUTPUT
                         System.out.println("Quantum size is ok.");
                         //

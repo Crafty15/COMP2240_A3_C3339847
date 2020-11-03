@@ -8,30 +8,34 @@ import java.util.ArrayList;
 
 
 public class Process {
-    //Static variables
-    private static ArrayList<Process> readyQ;
-    private static ArrayList<Process> blockedQ;
-    private static Process current;
-    //Member variables
-    ArrayList<Integer> pages;
-    String name;
+
+    //Class variables
+    private ArrayList<Integer> pages;
+    private String name;
+    private ArrayList<Integer> faultTimes;
+    private int tATime;
+
 
     //default
     public Process(){
-        this.pages = new ArrayList<Integer>();
-        this.readyQ = new ArrayList<Process>();
         name = "default";
+        this.faultTimes = new ArrayList<Integer>();
+        this.tATime = 0;
     }
 
     //constructor 1
     public Process(ArrayList<Integer> newPages){
         this.pages = newPages;
         name = "default1";
+        this.faultTimes = new ArrayList<Integer>();
+        this.tATime = 0;
     }
     //constructor 2
     public Process(ArrayList<Integer> newPages, String newName){
         this.pages = newPages;
         name = newName;
+        this.faultTimes = new ArrayList<Integer>();
+        this.tATime = 0;
     }
 
     //****Getters****
@@ -47,6 +51,9 @@ public class Process {
     public int getInstruction(int i){
         return this.pages.get(i);
     }
+    public ArrayList<Integer> getFaultTimes(){
+        return this.faultTimes;
+    }
 
     //****Setters****
     public void setPages(ArrayList<Integer> newPages){
@@ -55,6 +62,10 @@ public class Process {
 
     public void setName(String newName){
         this.name = newName;
+    }
+
+    public void setFaultTimes(ArrayList<Integer> newFaultTimes){
+        this.faultTimes = newFaultTimes;
     }
 
     //utility methods
