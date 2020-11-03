@@ -25,7 +25,7 @@ public class A3 {
                         //frame number ok, do whatever...
                         //TEST OUTPUT
                         System.out.println("Frame number format ok.");
-                        System.out.println("Frame numbers: " + );
+                        System.out.println("Frame numbers: " + numFrames);
                         //
                     } else {
                         System.out.println("Error parsing first argument.");
@@ -37,6 +37,7 @@ public class A3 {
                 else if (i == 1) {
                     if (Process.isNumeric(args[1]) && Integer.parseInt(args[1]) > 0) {
                         //quantum size input is ok, do whatever.....
+                        int timeQuantum = Integer.parseInt(args[1]);
                         //TEST OUTPUT
                         System.out.println("Quantum size is ok.");
                         //
