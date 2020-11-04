@@ -14,13 +14,15 @@ public class Process {
     private String name;
     private ArrayList<Integer> faultTimes;
     private int tATime;
-
+    private int marker; //NOTE: this can be used as a bit value for the clock policy,
+                        // or int value to store times for LRU policy
 
     //default
     public Process(){
         name = "default";
         this.faultTimes = new ArrayList<Integer>();
         this.tATime = 0;
+        this.marker = -1;
     }
 
     //constructor 1
@@ -29,6 +31,7 @@ public class Process {
         name = "default1";
         this.faultTimes = new ArrayList<Integer>();
         this.tATime = 0;
+        this.marker = -1;
     }
     //constructor 2
     public Process(ArrayList<Integer> newPages, String newName){
@@ -36,6 +39,7 @@ public class Process {
         name = newName;
         this.faultTimes = new ArrayList<Integer>();
         this.tATime = 0;
+        this.marker = -1;
     }
 
     //****Getters****
@@ -54,6 +58,9 @@ public class Process {
     public ArrayList<Integer> getFaultTimes(){
         return this.faultTimes;
     }
+    public int getMarker() {
+        return marker;
+    }
 
     //****Setters****
     public void setPages(ArrayList<Integer> newPages){
@@ -67,7 +74,9 @@ public class Process {
     public void setFaultTimes(ArrayList<Integer> newFaultTimes){
         this.faultTimes = newFaultTimes;
     }
-
+    public void setMarker(int newMarker) {
+        this.marker = newMarker;
+    }
     //utility methods
     public static ArrayList<Integer> getInstructionList(String filePath){
         ArrayList<Integer> result = new ArrayList<Integer>();

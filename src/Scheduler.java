@@ -15,8 +15,11 @@ public abstract class Scheduler {
     private int globalTime;
     private int maxPages;
     private int quantum;
+    //Represent main memory
+    private int[][] mainMem;
 
-    //Default
+    //Default - NOTE: Might need to get rid of the default constructor,
+    // or at least make sure to reinitialise the memory array
     public Scheduler(){
         this.readyQ = new ArrayList<Process>();
         this.blockedQ = new ArrayList<Process>();
@@ -24,6 +27,7 @@ public abstract class Scheduler {
         this.globalTime = 0;
         this.maxPages = 0;
         this.quantum = 0;
+        this.mainMem = new int[1][1];
     }
 
     //Constructor
@@ -33,6 +37,7 @@ public abstract class Scheduler {
         this.current = new Process();
         this.globalTime = newMaxPages;
         this.quantum = newQuantum;
+        this.mainMem = new int[1][1];
     }
     //Abstract methods
     abstract void run();
@@ -57,6 +62,8 @@ public abstract class Scheduler {
     public Process peekNextReady(){
         return getReadyQ().get(0);
     }
+
+    //
 
     //Setters
     public void setReadyQ(ArrayList<Process> newReadyQ){
