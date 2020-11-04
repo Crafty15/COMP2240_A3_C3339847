@@ -11,42 +11,47 @@ public class Process {
 
     //Class variables
     private ArrayList<Integer> pages;
-    private String name;
+    private int name;
     private ArrayList<Integer> faultTimes;
     private int tATime;
     private int marker; //NOTE: this can be used as a bit value for the clock policy,
                         // or int value to store times for LRU policy
+    private int currentPageIndex; //index of the current page
+    private int blockedTime;
 
     //default
     public Process(){
-        name = "default";
+        name = -1;
         this.faultTimes = new ArrayList<Integer>();
         this.tATime = 0;
         this.marker = -1;
+        this.currentPageIndex = -1;
     }
 
     //constructor 1
     public Process(ArrayList<Integer> newPages){
         this.pages = newPages;
-        name = "default1";
+        name = -1;
         this.faultTimes = new ArrayList<Integer>();
         this.tATime = 0;
         this.marker = -1;
+        this.currentPageIndex = -1;
     }
     //constructor 2
     public Process(ArrayList<Integer> newPages, String newName){
         this.pages = newPages;
-        name = newName;
+        name = Integer.parseInt(newName);
         this.faultTimes = new ArrayList<Integer>();
         this.tATime = 0;
         this.marker = -1;
+        this.currentPageIndex = 0;
     }
 
     //****Getters****
     public ArrayList<Integer> getPages(){
         return this.pages;
     }
-    public String getName(){
+    public int getName(){
         return this.name;
     }
     public int getProcessCount(){
@@ -61,13 +66,28 @@ public class Process {
     public int getMarker() {
         return marker;
     }
+    public int getCurrentPageIndex(){
+        return this.currentPageIndex;
+    }
+
+    public int getCurrentPageValue(){
+        return this.pages.get(this.currentPageIndex);
+    }
+
+    public int gettATime() {
+        return tATime;
+    }
+
+    public int getBlockedTime() {
+        return blockedTime;
+    }
 
     //****Setters****
     public void setPages(ArrayList<Integer> newPages){
         this.pages = newPages;
     }
 
-    public void setName(String newName){
+    public void setName(int newName){
         this.name = newName;
     }
 
@@ -76,6 +96,30 @@ public class Process {
     }
     public void setMarker(int newMarker) {
         this.marker = newMarker;
+    }
+
+    public void logFault(int newFaultTime){
+        this.faultTimes.add(newFaultTime);
+    }
+
+    public void setCurrentPageIndex(int newIndex){
+        this.currentPageIndex = newIndex;
+    }
+
+    public void incPageIndex(){
+        if(this.currentPageIndex == pages.size()){
+            this.currentPageIndex = 0;
+        }
+        else{
+            this.currentPageIndex += 1;
+        }
+    }
+    public void settATime(int tATime) {
+        this.tATime = tATime;
+    }
+
+    public void setBlockedTime(int blockedTime) {
+        this.blockedTime = blockedTime;
     }
     //utility methods
     public static ArrayList<Integer> getInstructionList(String filePath){

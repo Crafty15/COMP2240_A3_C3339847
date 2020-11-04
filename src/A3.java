@@ -13,11 +13,15 @@ public class A3 {
         //input variables
         int numFrames = 0;
         int timeQuantum = 0;
+        boolean inputOk = false;
+        //algorithm objects
+        Scheduler lruPolicy;
+        Scheduler clockPolicy;
 
         System.out.println("TESTING input....");
         //Check args exists, exit if not
         if(args.length == 0) {
-            System.out.println("No input arguments found. Please try again.");
+            System.out.println("No input arguments found.");
         }
         else{
             for(int i = 0; i < args.length; i++) {
@@ -29,10 +33,12 @@ public class A3 {
                         //TEST OUTPUT
                         System.out.println("Frame number format ok.");
                         System.out.println("Frame numbers: " + numFrames);
+                        inputOk = true;
                         //
                     } else {
                         System.out.println("Error parsing first argument.");
                         System.out.println("First argument should be a positive integer representing the total frames.");
+                        inputOk = false;
 
                     }
                 }
@@ -43,10 +49,12 @@ public class A3 {
                         timeQuantum = Integer.parseInt(args[1]);
                         //TEST OUTPUT
                         System.out.println("Quantum size is ok.");
+                        inputOk = true;
                         //
                     } else {
                         System.out.println("Error parsing second argument.");
                         System.out.println("Second argument should be a positive integer representing the time quantum.");
+                        inputOk = false;
 
                     }
                 }
@@ -64,26 +72,44 @@ public class A3 {
 
                         //Use file to build process objects - add them to the process list
                         //make a process name
-                        String pName = filePath.substring(0,   filePath.lastIndexOf("."));
+                        String pName = filePath.substring((filePath.lastIndexOf(".") - 1),   filePath.lastIndexOf("."));
                         //create a new process object
                         Process p = new Process(Process.getInstructionList(filePath), pName);
                         //add to the list
                         processList.add(p);
+                        inputOk = true;
 
                         //TEST OUTPUT OF PROCESS OBJECTS
-//                        int pCount = p.getProcessCount();
-//                        for(int f = 0; f < pCount; f++){
-//                            System.out.println(p.getName() + ": " + p.getInstruction(f));
-//                        }
+                        int pCount = p.getProcessCount();
+                        for(int f = 0; f < pCount; f++){
+                            System.out.println(p.getName() + ": " + p.getInstruction(f));
+                        }
                         //
                     } else {
                         System.out.println("Error parsing argument " + (i + 1) + ".");
                         System.out.println("Argument should be a .txt file.");
+                        inputOk = false;
 
                     }
                 }
             }
         }
+        //build process objects if input is ok - run the algorithms in this if statement
+        if(inputOk){
+            lruPolicy = new Scheduler(processList, numFrames, timeQuantum);
+            clockPolicy = new Scheduler(processList, numFrames, timeQuantum);
+
+            //TEST FRAME CALC
+            System.out.println("calc frame test: " + lruPolicy.calcFrames());
+            //run the algorithms
+            lruPolicy.runLRU();
+        }
+        else{
+            System.out.println("Please check command line args are correct and try again.");
+            System.out.println("Exiting.....");
+        }
+
+
     }
     //utils
 
