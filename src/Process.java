@@ -14,8 +14,11 @@ public class Process {
     private int name;
     private ArrayList<Integer> faultTimes;
     private int tATime;
-    private int marker; //NOTE: this can be used as a bit value for the clock policy,
-                        // or int value to store times for LRU policy
+    private int finishTime;
+    private int pageWorkCount;
+    private ArrayList<Integer> marker;  //A parallel arraylist used to keep track of page markers for LRU and clock policies
+    //NOTE: this can be used as a bit value for the clock policy,
+    // or int value to store times for LRU policy
     private int currentPageIndex; //index of the current page
     private int blockedTime;
 
@@ -24,7 +27,8 @@ public class Process {
         name = -1;
         this.faultTimes = new ArrayList<Integer>();
         this.tATime = 0;
-        this.marker = -1;
+        this.finishTime = -1;
+        this.marker = new ArrayList<Integer>();
         this.currentPageIndex = -1;
     }
 
@@ -34,7 +38,8 @@ public class Process {
         name = -1;
         this.faultTimes = new ArrayList<Integer>();
         this.tATime = 0;
-        this.marker = -1;
+        this.finishTime = -1;
+        this.marker = new ArrayList<Integer>();
         this.currentPageIndex = -1;
     }
     //constructor 2
@@ -43,7 +48,8 @@ public class Process {
         name = Integer.parseInt(newName);
         this.faultTimes = new ArrayList<Integer>();
         this.tATime = 0;
-        this.marker = -1;
+        this.finishTime = -1;
+        this.marker = new ArrayList<Integer>();
         this.currentPageIndex = 0;
     }
 
@@ -63,8 +69,11 @@ public class Process {
     public ArrayList<Integer> getFaultTimes(){
         return this.faultTimes;
     }
-    public int getMarker() {
-        return marker;
+    public ArrayList<Integer> getMarker() {
+        return this.marker;
+    }
+    public int getMarkerAtIndex(int index){
+        return this.marker.get(index);
     }
     public int getCurrentPageIndex(){
         return this.currentPageIndex;
@@ -82,6 +91,14 @@ public class Process {
         return blockedTime;
     }
 
+    public int getPageWorkCount(){
+        return this.pageWorkCount;
+    }
+
+    public int getFinishTime() {
+        return finishTime;
+    }
+
     //****Setters****
     public void setPages(ArrayList<Integer> newPages){
         this.pages = newPages;
@@ -94,8 +111,19 @@ public class Process {
     public void setFaultTimes(ArrayList<Integer> newFaultTimes){
         this.faultTimes = newFaultTimes;
     }
-    public void setMarker(int newMarker) {
-        this.marker = newMarker;
+    public void setMarkerList(ArrayList<Integer> newMarkerList) {
+        this.marker = newMarkerList;
+    }
+    public void setMarker(int index, int newMarker) {
+        this.marker.add(index, newMarker);
+    }
+
+    public void setPageWorkCount(int newCount){
+        this.pageWorkCount= newCount;
+    }
+
+    public void incPageWorkCount(){
+        this.pageWorkCount++;
     }
 
     public void logFault(int newFaultTime){
@@ -116,6 +144,10 @@ public class Process {
     }
     public void settATime(int tATime) {
         this.tATime = tATime;
+    }
+
+    public void setFinishTime(int finishTime) {
+        this.finishTime = finishTime;
     }
 
     public void setBlockedTime(int blockedTime) {
@@ -156,6 +188,11 @@ public class Process {
             return false;
         }
     }
+
+    //Process log
+//    public String getLog(){
+//
+//    }
 
 
 }

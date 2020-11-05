@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class Scheduler {
     //Class variables
     //private ArrayList<Process> inputQ;
-    private final int SWITCHINGTIME = 8;
+    private final int SWITCHINGTIME = 6;
     private ArrayList<Process> readyQ;
     private ArrayList<Process> blockedQ;
     private ArrayList<Process> finishedQ;
@@ -18,6 +18,7 @@ public class Scheduler {
     private int globalTime;
     private int maxPages;
     private int quantum;
+    //public String eventLog;
     //Represents main memory -
     private int[][] mainMem;
 
@@ -27,6 +28,7 @@ public class Scheduler {
         //this.inputQ = new ArrayList<Process>();
         this.readyQ = new ArrayList<Process>();
         this.blockedQ = new ArrayList<Process>();
+        this.finishedQ = new ArrayList<Process>();
         this.current = new Process();
         this.globalTime = 0;
         this.maxPages = 0;
@@ -39,6 +41,7 @@ public class Scheduler {
         //this.inputQ = newInputQ;
         this.readyQ = newInputQ;
         this.blockedQ = new ArrayList<Process>();
+        this.finishedQ = new ArrayList<Process>();
         this.current = new Process();
         this.maxPages = newMaxPages;
         this.quantum = newQuantum;
@@ -54,19 +57,32 @@ public class Scheduler {
                 //get the first process
                 this.current = getNextInput();
                 //check if the current page is in mainmem
-                while(checkPageInMem()){
+                int localTime = 0;
+                while(checkPageInMem() && (localTime < this.getQuantum())){
                     //execute page, inc current page, set page marker (global time for LRU)
                     this.globalTime++;
+                    //set marker to indicate when this page was LAST used
+                    //NOTE: Keep an eye on setMarker
+                    this.current.setMarker(this.current.getCurrentPageIndex() , this.globalTime);
                     this.current.incPageIndex(); //NOTE: check this method works correctly
-                    this.current.setMarker(this.globalTime);
                     //check to see if any processes are unblocked
-                    this.checkForReadyProcesses();
+                    this.checkForReadyProcessesLRU();
+                    localTime++;
+                    this.current.incPageWorkCount();
+                    //finish the process
+                    if(this.current.getPageWorkCount() == this.current.getProcessCount()){
+                        this.current.setFinishTime(globalTime);
+                        this.finishProcess();
+                    }
                 }
                 //block and page fault
                 this.current.logFault(this.globalTime);
                 this.block();
 //                this.globalTime++;
             }
+            //check to see if any processes are unblocked
+            this.checkForReadyProcessesLRU();
+            //inc global time
             this.globalTime++;
             //UPTO HERE. Need to step through and check if working ok so far. Set up logging etc
         }
@@ -124,19 +140,75 @@ public class Scheduler {
         return finishedQ;
     }
 
+    //NOTE:In checkPageInMem and loadPageToMem*****, possibleMemSize variable must be used so
+    // that loop doesn't iterate over entire frame numbers
+    // pIndex represents the current page's place in the 1st indices of mainMem 2d Array
+
     //loop through the 2d array at this processes memory index, and check if the page is there
     public Boolean checkPageInMem(){
-        //TEST VAR
         int pIndex = current.getName() - 1;
         int possibleMemSize = current.getPages().size();
         for(int i = 0; i < possibleMemSize; i++){
-            if(mainMem[pIndex][i] == current.getPages().get(i)) {
-                return true;
+            //NOTE: may need to change this to compare each index individually
+            int memIndex = mainMem[pIndex][i];
+            for(int j = 0; j < possibleMemSize; j++){
+                if(memIndex == current.getPages().get(j)) {
+                    return true;
+                }
             }
         }
         return false;
     }
-    //
+    //Check a certain process - loop through the 2d array at this processes memory index, and check if the page is there
+    public Boolean checkPageInMem(Process p){
+        int pIndex = p.getName() - 1;
+        int possibleMemSize = p.getPages().size();
+        for(int i = 0; i < possibleMemSize; i++){
+            //NOTE: may need to change this to compare each index individually
+            int memIndex = mainMem[pIndex][i];
+            for(int j = 0; j < possibleMemSize; j++){
+                if(memIndex == p.getPages().get(j)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    //load a page into mainMem, iterate over frames to find a spot
+    //if no room, switch according to the policy
+    public void loadPageToMemLRU(Process p){
+        boolean isPlaced = false;
+        int pIndex = p.getName() - 1;
+        int possibleMemSize = p.getPages().size();
+        int waitingPage = p.getCurrentPageValue();
+        for(int i = 0; i < possibleMemSize; i++){
+            //check mem space is free
+            if(mainMem[pIndex][i] == 0){
+                //next page
+                mainMem[pIndex][i] = waitingPage;
+                isPlaced = true;
+                break;
+            }
+        }
+        if(!isPlaced){
+            //LRU switch - iterate over process page markers, place current.getPageValue into mainMem in place
+            //of the least recently used page
+            //the value of the marker at the index, represents when the process at that index
+            //was last used
+            int lruIndexVal = p.getMarkerAtIndex(0);
+            int lruIndex = -1;
+            for(int i = 0; i < p.getMarker().size(); i++) {
+                int nextIndex = p.getMarkerAtIndex(i);
+                if(lruIndexVal < nextIndex){
+                    lruIndexVal = nextIndex;
+                    lruIndex = i;
+                }
+            }
+            //assign the waiting page to the memory location
+            mainMem[pIndex][lruIndex] = waitingPage;
+        }
+    }
 
     //Setters
     public void setReadyQ(ArrayList<Process> newReadyQ){
@@ -185,18 +257,38 @@ public class Scheduler {
         this.current.setBlockedTime(this.globalTime);
         this.blockedQ.add(this.current);
     }
+    //set the current process to finished
+    public void finishProcess(){
+        this.finishedQ.add(this.current);
+    }
+
     //check if any processes have become unblocked, add them to the readyQ
-    public void checkForReadyProcesses(){
+    //if process has waited for the SWITCHINGTIME, load it's next page into memory
+    public void checkForReadyProcessesLRU(){
+        //iterate over blockedQ and make list of unblocked processes
         for(int i = 0; i < blockedQ.size(); i++){
             Process p = blockedQ.get(i);
-            if((this.globalTime - p.getBlockedTime()) == SWITCHINGTIME){
+            if((this.globalTime - p.getBlockedTime()) >= SWITCHINGTIME) {
                 this.readyQ.add(p);
+                if(!checkPageInMem(p)){
+                    loadPageToMemLRU(p);
+                }
+            }
+        }
+        //iterate over readyQ, remove anything that matches from the blocked list
+        for(int j = 0; j < readyQ.size(); j++){
+            Process rq = this.readyQ.get(j);
+            for(int k = 0; k < this.blockedQ.size(); k++){
+                if(rq.equals(this.blockedQ.get(k))){
+                    this.blockedQ.remove(k);
+                }
             }
         }
     }
 
-
-
-
     //some kind of event log
+//    public String getRunLog(){
+//        String msg = "LRU - Fixed:";
+//    }
+
 }

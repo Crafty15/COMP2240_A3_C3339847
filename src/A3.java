@@ -103,6 +103,8 @@ public class A3 {
             System.out.println("calc frame test: " + lruPolicy.calcFrames());
             //run the algorithms
             lruPolicy.runLRU();
+            //print the output
+
         }
         else{
             System.out.println("Please check command line args are correct and try again.");
