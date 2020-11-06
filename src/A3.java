@@ -15,8 +15,8 @@ public class A3 {
         int timeQuantum = 0;
         boolean inputOk = false;
         //algorithm objects
-        Scheduler lruPolicy;
-        Scheduler clockPolicy;
+        LRUScheduler lruPolicy;
+        LRUScheduler clockPolicy;
 
         System.out.println("TESTING input....");
         //Check args exists, exit if not
@@ -96,14 +96,15 @@ public class A3 {
         }
         //build process objects if input is ok - run the algorithms in this if statement
         if(inputOk){
-            lruPolicy = new Scheduler(processList, numFrames, timeQuantum);
-            clockPolicy = new Scheduler(processList, numFrames, timeQuantum);
+            lruPolicy = new LRUScheduler(processList, numFrames, timeQuantum);
+            clockPolicy = new LRUScheduler(processList, numFrames, timeQuantum);
 
             //TEST FRAME CALC
             System.out.println("calc frame test: " + lruPolicy.calcFrames());
             //run the algorithms
             lruPolicy.runLRU();
             //print the output
+            System.out.println(lruPolicy.getRunLog());
 
         }
         else{

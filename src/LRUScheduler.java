@@ -1,13 +1,15 @@
-//File: Scheduler.java
-//Purpose:	Scheduler base class for COMP2240 - operating systems assignment 3
+//File: LRUScheduler.java
+//Purpose:	LRUScheduler class for COMP2240 - operating systems assignment 3
 //Programmer: Liam Craft - c3339847
 //Date: 3/11/2020
 
 //NOTE: Scheduler should implement the RR process switching and time quantum stuff
 
 import java.util.ArrayList;
+import java.util.Collections;
+//import java.util.Formatter;
 
-public class Scheduler {
+public class LRUScheduler {
     //Class variables
     //private ArrayList<Process> inputQ;
     private final int SWITCHINGTIME = 6;
@@ -18,13 +20,14 @@ public class Scheduler {
     private int globalTime;
     private int maxPages;
     private int quantum;
+    private int memAlloc;
     //public String eventLog;
     //Represents main memory -
     private int[][] mainMem;
 
     //Default - NOTE: Might need to get rid of the default constructor,
     // or at least make sure to reinitialise the memory array
-    public Scheduler(){
+    public LRUScheduler(){
         //this.inputQ = new ArrayList<Process>();
         this.readyQ = new ArrayList<Process>();
         this.blockedQ = new ArrayList<Process>();
@@ -37,7 +40,7 @@ public class Scheduler {
     }
 
     //Constructor
-    public Scheduler(ArrayList<Process> newInputQ, int newMaxPages, int newQuantum){
+    public LRUScheduler(ArrayList<Process> newInputQ, int newMaxPages, int newQuantum){
         //this.inputQ = newInputQ;
         this.readyQ = newInputQ;
         this.blockedQ = new ArrayList<Process>();
@@ -45,11 +48,12 @@ public class Scheduler {
         this.current = new Process();
         this.maxPages = newMaxPages;
         this.quantum = newQuantum;
-        this.mainMem = new int[newInputQ.size()][this.calcFrames()];
+        this.memAlloc = this.calcFrames();
+        this.mainMem = new int[newInputQ.size()][memAlloc];
     }
     //run methods
     public void runLRU(){
-        while(this.globalTime < 40){
+        while(!this.readyQ.isEmpty() || !this.blockedQ.isEmpty()){
 
             //while there are still processes in the readyQ (what about the blocked Queue?)
             //NOTE: should probably add a check/wait for any processes that are blocked
@@ -58,9 +62,12 @@ public class Scheduler {
                 this.current = getNextInput();
                 //check if the current page is in mainmem
                 int localTime = 0;
-                while(checkPageInMem() && (localTime < this.getQuantum())){
+                while(!current.getIsFinished() && checkPageInMem() && (localTime < this.getQuantum())){
                     //execute page, inc current page, set page marker (global time for LRU)
                     this.globalTime++;
+
+                    //TEST OUTPUT
+                    System.out.println("Global Time: " + this.globalTime);
                     //set marker to indicate when this page was LAST used
                     //NOTE: Keep an eye on setMarker
                     this.current.setMarker(this.current.getCurrentPageIndex() , this.globalTime);
@@ -70,26 +77,35 @@ public class Scheduler {
                     localTime++;
                     this.current.incPageWorkCount();
                     //finish the process
-                    if(this.current.getPageWorkCount() == this.current.getProcessCount()){
+                    if(this.current.getPageWorkCount() == (this.current.getProcessCount())){
+                        current.setFinished();;
                         this.current.setFinishTime(globalTime);
-                        this.finishProcess();
                     }
                 }
-                //block and page fault
-                this.current.logFault(this.globalTime);
-                this.block();
+                if(current.getIsFinished()){
+                    //this.current.setFinishTime(globalTime);
+                    this.finishProcess();
+                }
+                //SHOULD BE, IF page isn't in main mem - block, else place back into readyQ()
+                else if(localTime < this.getQuantum()){
+                    //block and page fault
+                    this.current.logFault(this.globalTime);
+                    this.block();
+                }
+                else{
+                    this.readyQ.add(this.current);
+                }
 //                this.globalTime++;
             }
-            //check to see if any processes are unblocked
-            this.checkForReadyProcessesLRU();
             //inc global time
             this.globalTime++;
-            //UPTO HERE. Need to step through and check if working ok so far. Set up logging etc
+            //TEST OUTPUT
+            System.out.println("Global Time: " + this.globalTime);
+            //check to see if any processes are unblocked
+            this.checkForReadyProcessesLRU();
         }
     };
-    public void runClock(){
 
-    }
 
     //Getters
     public ArrayList<Process> getReadyQ(){
@@ -132,6 +148,10 @@ public class Scheduler {
         return mainMem;
     }
 
+    public int getMemAlloc(){
+        return this.memAlloc;
+    }
+
 //    public ArrayList<Process> getInputQ() {
 //        return inputQ;
 //    }
@@ -141,35 +161,33 @@ public class Scheduler {
     }
 
     //NOTE:In checkPageInMem and loadPageToMem*****, possibleMemSize variable must be used so
-    // that loop doesn't iterate over entire frame numbers
+    // that loop doesn't iterate over entire frame numbers EDIT: WRONG!, There could be repeats in the page list
+    //meaning the actual page list size is big, but actual instruction list, not so big.
+    //
     // pIndex represents the current page's place in the 1st indices of mainMem 2d Array
 
     //loop through the 2d array at this processes memory index, and check if the page is there
     public Boolean checkPageInMem(){
+        //loop over currents memory stack, and check for the page value that is at the current page index
+        int toFind = current.getCurrentPageValue();
         int pIndex = current.getName() - 1;
-        int possibleMemSize = current.getPages().size();
-        for(int i = 0; i < possibleMemSize; i++){
-            //NOTE: may need to change this to compare each index individually
-            int memIndex = mainMem[pIndex][i];
-            for(int j = 0; j < possibleMemSize; j++){
-                if(memIndex == current.getPages().get(j)) {
-                    return true;
-                }
+        int memAlloc = this.getMemAlloc();
+        for(int i = 0; i < memAlloc; i++){
+            if(toFind == mainMem[pIndex][i]){
+                return true;
             }
         }
         return false;
     }
     //Check a certain process - loop through the 2d array at this processes memory index, and check if the page is there
     public Boolean checkPageInMem(Process p){
+        //loop over currents memory stack, and check for the page value that is at the current page index
+        int toFind = p.getCurrentPageValue();
         int pIndex = p.getName() - 1;
-        int possibleMemSize = p.getPages().size();
-        for(int i = 0; i < possibleMemSize; i++){
-            //NOTE: may need to change this to compare each index individually
-            int memIndex = mainMem[pIndex][i];
-            for(int j = 0; j < possibleMemSize; j++){
-                if(memIndex == p.getPages().get(j)) {
-                    return true;
-                }
+        int memAlloc = this.getMemAlloc();
+        for(int i = 0; i < memAlloc; i++){
+            if(toFind == mainMem[pIndex][i]){
+                return true;
             }
         }
         return false;
@@ -287,8 +305,16 @@ public class Scheduler {
     }
 
     //some kind of event log
-//    public String getRunLog(){
-//        String msg = "LRU - Fixed:";
-//    }
+    public String getRunLog(){
+        Collections.sort(this.finishedQ, new NameSort());
+        String msg = "LRU - Fixed: \n" ;
+        msg += "PID  Process Name       Turnaround Time  # Faults  Fault Times\n";
+        for(int i = 0; i < this.finishedQ.size(); i++){
+            Process p = this.finishedQ.get(i);
+            msg += p.getName() + "  Process" + p.getName() + ".txt\t\t\t" + p.getFinishTime() + "\t\t" + p.getFaultCount() + "\t\t" +  p.getFaultString() + "\n";
+        }
+        return msg;
+    }
+
 
 }
