@@ -5,6 +5,8 @@
 
 //NOTE: Scheduler should implement the RR process switching and time quantum stuff
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 //import java.util.Formatter;
@@ -69,8 +71,11 @@ public class LRUScheduler {
                     //TEST OUTPUT
                     System.out.println("Global Time: " + this.globalTime);
                     //set marker to indicate when this page was LAST used
-                    //NOTE: Keep an eye on setMarker
-                    this.current.setMarker(this.current.getCurrentPageIndex() , this.globalTime);
+//                    //NOTE: Keep an eye on setMarker -- MOVED TO LOADPAGETOMEM
+                    if(this.current.getMarkerListSize() <= this.current.getCurrentPageIndex()){
+                        this.current.setMarker(this.globalTime);
+                    }
+//                    this.current.setMarker(this.current.getCurrentPageIndex() , this.globalTime);
                     this.current.incPageIndex(); //NOTE: check this method works correctly
                     //check to see if any processes are unblocked
                     this.checkForReadyProcessesLRU();
@@ -195,16 +200,20 @@ public class LRUScheduler {
 
     //load a page into mainMem, iterate over frames to find a spot
     //if no room, switch according to the policy
-    public void loadPageToMemLRU(Process p){
+    public void loadPageToMemLRU(@NotNull Process p){
         boolean isPlaced = false;
         int pIndex = p.getName() - 1;
-        int possibleMemSize = p.getPages().size();
+        //possible mem size should be...size of the memory allocation
+        int possibleMemSize = this.getMemAlloc();
         int waitingPage = p.getCurrentPageValue();
         for(int i = 0; i < possibleMemSize; i++){
             //check mem space is free
             if(mainMem[pIndex][i] == 0){
                 //next page
                 mainMem[pIndex][i] = waitingPage;
+                //NOTE: Moved this from the Run method, hopefully will make
+                //marker list parallel with mainMem
+                this.current.setMarker(i , this.globalTime);
                 isPlaced = true;
                 break;
             }
@@ -213,18 +222,18 @@ public class LRUScheduler {
             //LRU switch - iterate over process page markers, place current.getPageValue into mainMem in place
             //of the least recently used page
             //the value of the marker at the index, represents when the process at that index
-            //was last used
+            //was last used (which will have the highest values)
             int lruIndexVal = p.getMarkerAtIndex(0);
             int lruIndex = -1;
             for(int i = 0; i < p.getMarker().size(); i++) {
-                int nextIndex = p.getMarkerAtIndex(i);
-                if(lruIndexVal < nextIndex){
-                    lruIndexVal = nextIndex;
+                int nextIndexVal = p.getMarkerAtIndex(i);
+                if(lruIndexVal < nextIndexVal){
+                    lruIndexVal = nextIndexVal;
                     lruIndex = i;
                 }
             }
             //assign the waiting page to the memory location
-            mainMem[pIndex][lruIndex] = waitingPage;
+            mainMem[pIndex][lruIndex] = waitingPage; //fault here
         }
     }
 

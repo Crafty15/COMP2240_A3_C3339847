@@ -76,8 +76,14 @@ public class A3 {
                         //create a new process object
                         Process p = new Process(Process.getInstructionList(filePath), pName);
                         //add to the list
-                        processList.add(p);
-                        inputOk = true;
+                        //check objects are not null
+                        if(p != null){
+                            processList.add(p);
+                            inputOk = true;
+                        }
+                        else{
+                            inputOk = false;
+                        }
 
                         //TEST OUTPUT OF PROCESS OBJECTS
                         int pCount = p.getProcessCount();

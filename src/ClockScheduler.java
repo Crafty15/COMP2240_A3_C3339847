@@ -201,7 +201,8 @@ public class ClockScheduler {
     public void loadPageToMemClock(Process p){
         boolean isPlaced = false;
         int pIndex = p.getName() - 1;
-        int possibleMemSize = p.getPages().size();
+        //possible mem size should be...
+        int possibleMemSize = this.getMemAlloc();
         int waitingPage = p.getCurrentPageValue();
         for(int i = 0; i < possibleMemSize; i++){
             //check mem space is free

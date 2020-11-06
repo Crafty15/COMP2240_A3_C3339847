@@ -18,6 +18,7 @@ public class Process {
     private int pageWorkCount;
     private boolean isFinished;
     private ArrayList<Integer> marker;  //A parallel arraylist used to keep track of page markers for replacement policies
+    //should probs somehow run parallel with the mainMem array
     //NOTE: this can be used as a use bit value for the clock policy,
     // or int value to store times for LRU policy
     private int currentPageIndex; //index of the current page
@@ -105,6 +106,9 @@ public class Process {
     public boolean getIsFinished(){
         return this.isFinished;
     }
+    public int getMarkerListSize(){
+        return this.marker.size();
+    }
 
 
     //****Setters****
@@ -122,7 +126,11 @@ public class Process {
     public void setMarkerList(ArrayList<Integer> newMarkerList) {
         this.marker = newMarkerList;
     }
+    public void setMarker(int newMarker){
+        this.marker.add(newMarker);
+    }
     public void setMarker(int index, int newMarker) {
+        this.marker.ensureCapacity(index + 1);
         this.marker.add(index, newMarker);
     }
 
