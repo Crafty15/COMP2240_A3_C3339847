@@ -23,6 +23,8 @@ public class Process {
     // or int value to store times for LRU policy
     private int currentPageIndex; //index of the current page
     private int blockedTime;
+    private int nextFramePtr;
+
 
     //default
     public Process(){
@@ -33,6 +35,7 @@ public class Process {
         this.marker = new ArrayList<Integer>();
         this.currentPageIndex = -1;
         this.isFinished = false;
+        this.nextFramePtr = 0;
     }
 
     //constructor 1
@@ -45,6 +48,7 @@ public class Process {
         this.marker = new ArrayList<Integer>();
         this.currentPageIndex = -1;
         this.isFinished = false;
+        this.nextFramePtr = 0;
     }
     //constructor 2
     public Process(ArrayList<Integer> newPages, String newName){
@@ -56,6 +60,7 @@ public class Process {
         this.marker = new ArrayList<Integer>();
         this.currentPageIndex = 0;
         this.isFinished = false;
+        this.nextFramePtr = 0;
     }
 
     //****Getters****
@@ -83,6 +88,7 @@ public class Process {
     public int getMarkerAtIndex(int index){
         return this.marker.get(index);
     }
+
     public int getCurrentPageIndex(){
         return this.currentPageIndex;
     }
@@ -109,7 +115,9 @@ public class Process {
     public int getMarkerListSize(){
         return this.marker.size();
     }
-
+    public int getNextFramePtr(){
+        return this.nextFramePtr;
+    }
 
     //****Setters****
     public void setPages(ArrayList<Integer> newPages){
@@ -130,8 +138,13 @@ public class Process {
         this.marker.add(newMarker);
     }
     public void setMarker(int index, int newMarker) {
-        this.marker.ensureCapacity(index + 1);
-        this.marker.add(index, newMarker);
+        if(this.marker.size() <= index){
+            this.marker.add(newMarker);
+        }
+        else{
+            this.marker.set(index, newMarker);
+        }
+
     }
 
     public void setPageWorkCount(int newCount){
@@ -158,6 +171,12 @@ public class Process {
         else{
             this.currentPageIndex++;
         }
+    }
+    //get the current frame ptr then increment
+    public int getAndIncNextFramePtr(){
+        int result = this.nextFramePtr;
+        this.incFramePointer();
+        return result;
     }
 
     public void setFinishTime(int finishTime) {
@@ -219,10 +238,18 @@ public class Process {
         }
         return msg;
     }
-    //Process log
-//    public String getLog(){
-//
-//    }
 
-
+    //increment the frame pointer: This should wrap back to the start if it reaches the end
+    //of the arraylist
+    public void incFramePointer(){
+        if(this.nextFramePtr == this.marker.size() - 1){
+            this.nextFramePtr = 0;
+        }
+        else{
+            this.nextFramePtr++;
+        }
+    }
+    public void setNextFramePtr(int newPtr){
+        this.nextFramePtr = newPtr;
+    }
 }

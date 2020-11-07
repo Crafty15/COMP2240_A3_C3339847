@@ -16,7 +16,7 @@ public class A3 {
         boolean inputOk = false;
         //algorithm objects
         LRUScheduler lruPolicy;
-        LRUScheduler clockPolicy;
+        ClockScheduler clockPolicy;
 
         System.out.println("TESTING input....");
         //Check args exists, exit if not
@@ -103,14 +103,17 @@ public class A3 {
         //build process objects if input is ok - run the algorithms in this if statement
         if(inputOk){
             lruPolicy = new LRUScheduler(processList, numFrames, timeQuantum);
-            clockPolicy = new LRUScheduler(processList, numFrames, timeQuantum);
+            ArrayList<Process> processListCopy = (ArrayList<Process>) processList.clone();
+            clockPolicy = new ClockScheduler(processListCopy, numFrames, timeQuantum);
 
             //TEST FRAME CALC
             System.out.println("calc frame test: " + lruPolicy.calcFrames());
             //run the algorithms
             lruPolicy.runLRU();
+            clockPolicy.runClock();;
             //print the output
             System.out.println(lruPolicy.getRunLog());
+            System.out.println(clockPolicy.getRunLog());
 
         }
         else{

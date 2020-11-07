@@ -20,7 +20,7 @@ public class ClockScheduler {
     private int globalTime;
     private int maxPages;
     private int quantum;
-    private int nextFramePtr;
+//    private int nextFramePtr;
     private int memAlloc;
     //public String eventLog;
     //Represents main memory -
@@ -38,7 +38,7 @@ public class ClockScheduler {
         this.maxPages = 0;
         this.quantum = 0;
         this.mainMem = new int[1][1];
-        this.nextFramePtr = 0;
+//        this.nextFramePtr = 0;
     }
 
     //Constructor
@@ -52,11 +52,11 @@ public class ClockScheduler {
         this.quantum = newQuantum;
         this.memAlloc = this.calcFrames();
         this.mainMem = new int[newInputQ.size()][memAlloc];
-        this.nextFramePtr = 0;
+//        this.nextFramePtr = 0;
     }
     //run methods
     public void runClock(){
-        while(this.globalTime < 40){
+        while(!this.readyQ.isEmpty() || !this.blockedQ.isEmpty()){
 
             //while there are still processes in the readyQ (what about the blocked Queue?)
             //NOTE: should probably add a check/wait for any processes that are blocked
@@ -71,9 +71,15 @@ public class ClockScheduler {
 
                     //TEST OUTPUT
                     System.out.println("Global Time: " + this.globalTime);
+                    //TEST BREAKPOINT
+                    if(globalTime >= 101){
+                        int test = globalTime;
+                    }
                     //set marker to indicate when this page was LAST used
                     //NOTE: Keep an eye on setMarker
-                    this.current.setMarker(this.current.getCurrentPageIndex() , 1);
+                    if(this.current.getMarkerListSize() <= this.mainMem[this.current.getName()-1].length){
+                        this.current.setMarker(this.current.getCurrentPageIndex() , 1);
+                    }
                     this.current.incPageIndex(); //NOTE: check this method works correctly
                     //check to see if any processes are unblocked
                     this.checkForReadyProcessesLRU();
@@ -102,6 +108,10 @@ public class ClockScheduler {
             }
             //inc global time
             this.globalTime++;
+            //TEST BREAKPOINT
+            if(globalTime >= 101){
+                int test = globalTime;
+            }
             //TEST OUTPUT
             System.out.println("Global Time: " + this.globalTime);
             //check to see if any processes are unblocked
@@ -218,18 +228,34 @@ public class ClockScheduler {
             //of the first page with a use bit (marker) of 0.
             //each time marker = 1, set to 0
             //if all frame markers = 1 after one cycle, replace the first one
-            //int indexVal = p.getMarkerAtIndex(this.nextFramePtr);
-//            for(int i = 0; i < p.getMarker().size(); i++){
-//                int useBit = p.getMarkerAtIndex(i);
-//                if(useBit == 0){
-//
-//                }
-//                else{
-//                    p.setMarker(this.nextFramePtr, 0);
-//                }
-//            }
-            //assign the waiting page to the memory location
-//            mainMem[pIndex][index] = waitingPage;
+
+            //TEST BREAKPOINT
+            if(globalTime >= 94){
+                int test = globalTime;
+            }
+            //****these will be used to ensure the list is iterated over once****
+            int count = 0;
+            int mListSize = p.getMarker().size();
+            //********
+            int toReplace = 0;
+            int markerVal = 0;
+            //loop?
+            boolean found = false;
+            //
+            while(!found){
+                int nextFramePtr = p.getAndIncNextFramePtr();
+                markerVal = p.getMarkerAtIndex(nextFramePtr);
+                if(markerVal == 0){
+                    toReplace = markerVal;
+                    found = true;
+                }
+                else{
+                    p.setMarker(nextFramePtr, 0);
+                }
+            }
+            //
+//            assign the waiting page to the memory location
+            mainMem[pIndex][toReplace] = waitingPage;
         }
     }
 
@@ -309,10 +335,12 @@ public class ClockScheduler {
         }
     }
 
+
+
     //some kind of event log
     public String getRunLog(){
         Collections.sort(this.finishedQ, new NameSort());
-        String msg = "LRU - Fixed: \n" ;
+        String msg = "CLOCK - Fixed: \n" ;
         msg += "PID  Process Name       Turnaround Time  # Faults  Fault Times\n";
         for(int i = 0; i < this.finishedQ.size(); i++){
             Process p = this.finishedQ.get(i);

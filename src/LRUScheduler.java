@@ -71,26 +71,27 @@ public class LRUScheduler {
                     //TEST OUTPUT
                     System.out.println("Global Time: " + this.globalTime);
                     //set marker to indicate when this page was LAST used
-//                    //NOTE: Keep an eye on setMarker -- MOVED TO LOADPAGETOMEM
+//                    //NOTE: Keep an eye on setMarker -- Also moved to loadPageToMem, this part should only log
+                    //      if the entry is new, i.e. is not replacing something.
                     if(this.current.getMarkerListSize() <= this.mainMem[this.current.getName()-1].length){
                         this.current.setMarker(this.globalTime);
                     }
                     //TEST BREAKPOINT
-                    if(globalTime >= 110){
+                    if(globalTime >= 104){
                         int test = globalTime;
                     }
-//                    this.current.setMarker(this.current.getCurrentPageIndex() , this.globalTime);
                     this.current.incPageIndex(); //NOTE: check this method works correctly
                     //check to see if any processes are unblocked
                     this.checkForReadyProcessesLRU();
                     localTime++;
                     this.current.incPageWorkCount();
-                    //finish the process
+                    //Set process to finished
                     if(this.current.getPageWorkCount() == (this.current.getProcessCount())){
                         current.setFinished();
                         this.current.setFinishTime(globalTime);
                     }
                 }
+                //add finished process to the finishedQ
                 if(current.getIsFinished()){
                     //this.current.setFinishTime(globalTime);
                     this.finishProcess();
@@ -109,7 +110,7 @@ public class LRUScheduler {
             //inc global time
             this.globalTime++;
             //TEST BREAKPOINT
-            if(globalTime >= 101){
+            if(globalTime >= 103){
                 int test = globalTime;
             }
             //TEST OUTPUT
@@ -235,13 +236,13 @@ public class LRUScheduler {
             int lruIndexFirst = p.getMarkerAtIndex(0);
             int lruIndexToSwap = 0;
             //TEST BREAKPOINT
-            if(globalTime >= 109){
+            if(globalTime >= 97){
                 int test = globalTime;
             }
             for(int i = 0; i < p.getMarker().size(); i++) {
                 int nextIndexVal = p.getMarkerAtIndex(i);
                 //assign highest value (at the index)
-                if(lruIndexFirst > nextIndexVal){
+                if(lruIndexFirst >= nextIndexVal){
                     lruIndexFirst = nextIndexVal;
                     lruIndexToSwap = i;
                 }
