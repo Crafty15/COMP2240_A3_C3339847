@@ -72,8 +72,12 @@ public class LRUScheduler {
                     System.out.println("Global Time: " + this.globalTime);
                     //set marker to indicate when this page was LAST used
 //                    //NOTE: Keep an eye on setMarker -- MOVED TO LOADPAGETOMEM
-                    if(this.current.getMarkerListSize() <= this.current.getCurrentPageIndex()){
+                    if(this.current.getMarkerListSize() <= this.mainMem[this.current.getName()-1].length){
                         this.current.setMarker(this.globalTime);
+                    }
+                    //TEST BREAKPOINT
+                    if(globalTime >= 110){
+                        int test = globalTime;
                     }
 //                    this.current.setMarker(this.current.getCurrentPageIndex() , this.globalTime);
                     this.current.incPageIndex(); //NOTE: check this method works correctly
@@ -83,7 +87,7 @@ public class LRUScheduler {
                     this.current.incPageWorkCount();
                     //finish the process
                     if(this.current.getPageWorkCount() == (this.current.getProcessCount())){
-                        current.setFinished();;
+                        current.setFinished();
                         this.current.setFinishTime(globalTime);
                     }
                 }
@@ -104,6 +108,10 @@ public class LRUScheduler {
             }
             //inc global time
             this.globalTime++;
+            //TEST BREAKPOINT
+            if(globalTime >= 101){
+                int test = globalTime;
+            }
             //TEST OUTPUT
             System.out.println("Global Time: " + this.globalTime);
             //check to see if any processes are unblocked
@@ -222,18 +230,27 @@ public class LRUScheduler {
             //LRU switch - iterate over process page markers, place current.getPageValue into mainMem in place
             //of the least recently used page
             //the value of the marker at the index, represents when the process at that index
-            //was last used (which will have the highest values)
-            int lruIndexVal = p.getMarkerAtIndex(0);
-            int lruIndex = -1;
+            //has been in memory the longest (which will have the lowest value)
+            //needs to find the index with the lowest value and swap waitingPage into mainMem array at that index
+            int lruIndexFirst = p.getMarkerAtIndex(0);
+            int lruIndexToSwap = 0;
+            //TEST BREAKPOINT
+            if(globalTime >= 109){
+                int test = globalTime;
+            }
             for(int i = 0; i < p.getMarker().size(); i++) {
                 int nextIndexVal = p.getMarkerAtIndex(i);
-                if(lruIndexVal < nextIndexVal){
-                    lruIndexVal = nextIndexVal;
-                    lruIndex = i;
+                //assign highest value (at the index)
+                if(lruIndexFirst > nextIndexVal){
+                    lruIndexFirst = nextIndexVal;
+                    lruIndexToSwap = i;
                 }
             }
             //assign the waiting page to the memory location
-            mainMem[pIndex][lruIndex] = waitingPage; //fault here
+            //NOTE: Moved this from the Run method, hopefully will make
+            //marker list parallel with mainMem
+            this.current.setMarker(lruIndexToSwap , this.globalTime);
+            mainMem[pIndex][lruIndexToSwap] = waitingPage; //fault here
         }
     }
 
