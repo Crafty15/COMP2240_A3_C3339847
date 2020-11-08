@@ -110,11 +110,12 @@ public class A3 {
             System.out.println("calc frame test: " + lruPolicy.calcFrames());
             //run the algorithms
             lruPolicy.runLRU();
-            clockPolicy.runClock();;
+            //clockPolicy.runClock();;
             //print the output
             System.out.println(lruPolicy.getRunLog());
-            System.out.println(clockPolicy.getRunLog());
-
+            System.out.println("------------------------------------------------------------");
+//            System.out.println(clockPolicy.getRunLog());
+//
         }
         else{
             System.out.println("Please check command line args are correct and try again.");

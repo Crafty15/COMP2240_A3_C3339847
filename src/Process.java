@@ -226,15 +226,14 @@ public class Process {
         }
     }
     public String getFaultString(){
-        String msg = "{";
+        String msg = "";
         for(int i = 0; i < this.faultTimes.size(); i++){
             if(i == this.faultTimes.size() - 1){
-                msg += this.faultTimes.get(i) + "}";
+                msg += this.faultTimes.get(i);
             }
             else{
                 msg += this.faultTimes.get(i) + ", ";
             }
-
         }
         return msg;
     }

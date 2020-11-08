@@ -64,6 +64,10 @@ public class LRUScheduler {
                 this.current = getNextInput();
                 //check if the current page is in mainmem
                 int localTime = 0;
+                //TEST BREAKPOINT
+                if(globalTime >= 110){
+                    int test = globalTime;
+                }
                 while(!current.getIsFinished() && checkPageInMem() && (localTime < this.getQuantum())){
                     //execute page, inc current page, set page marker (global time for LRU)
                     this.globalTime++;
@@ -73,11 +77,14 @@ public class LRUScheduler {
                     //set marker to indicate when this page was LAST used
 //                    //NOTE: Keep an eye on setMarker -- Also moved to loadPageToMem, this part should only log
                     //      if the entry is new, i.e. is not replacing something.
+                    if(globalTime >= 93){
+                        int test = globalTime;
+                    }
                     if(this.current.getMarkerListSize() <= this.mainMem[this.current.getName()-1].length){
                         this.current.setMarker(this.globalTime);
                     }
                     //TEST BREAKPOINT
-                    if(globalTime >= 104){
+                    if(globalTime >= 123){
                         int test = globalTime;
                     }
                     this.current.incPageIndex(); //NOTE: check this method works correctly
@@ -236,7 +243,7 @@ public class LRUScheduler {
             int lruIndexFirst = p.getMarkerAtIndex(0);
             int lruIndexToSwap = 0;
             //TEST BREAKPOINT
-            if(globalTime >= 97){
+            if(globalTime >= 88 && p.getName() == 3){
                 int test = globalTime;
             }
             for(int i = 0; i < p.getMarker().size(); i++) {
@@ -250,7 +257,12 @@ public class LRUScheduler {
             //assign the waiting page to the memory location
             //NOTE: Moved this from the Run method, hopefully will make
             //marker list parallel with mainMem
-            this.current.setMarker(lruIndexToSwap , this.globalTime);
+            //TEST BREAKPOINT
+            if(globalTime >= 94){
+                int test = globalTime;
+            }
+            //error was here
+            p.setMarker(lruIndexToSwap , this.globalTime);
             mainMem[pIndex][lruIndexToSwap] = waitingPage; //fault here
         }
     }
@@ -338,7 +350,8 @@ public class LRUScheduler {
         msg += "PID  Process Name       Turnaround Time  # Faults  Fault Times\n";
         for(int i = 0; i < this.finishedQ.size(); i++){
             Process p = this.finishedQ.get(i);
-            msg += p.getName() + "  Process" + p.getName() + ".txt\t\t\t" + p.getFinishTime() + "\t\t" + p.getFaultCount() + "\t\t" +  p.getFaultString() + "\n";
+            //msg += p.getName() + "  Process" + p.getName() + ".txt\t\t\t" + p.getFinishTime() + "\t\t" + p.getFaultCount() + "\t\t" +  p.getFaultString() + "\n";
+            msg += String.format("%-2s  %-10s      %-16s  %-6s   %-10s", p.getName(), "  Process" + p.getName() + ".txt", p.getFinishTime(), p.getFaultCount(), "{" + p.getFaultString() + "}\n");
         }
         return msg;
     }
